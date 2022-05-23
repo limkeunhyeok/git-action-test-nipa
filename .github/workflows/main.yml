@@ -18,6 +18,9 @@ jobs:
       - name: List
         run: ls
 
+      - name: git log
+        run: git log --oneline --all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
