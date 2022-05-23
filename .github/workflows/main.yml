@@ -1,5 +1,10 @@
 name: CI
 
+env:
+  DOCKER_IMAGE: ghcr.io/${{ github.actor }}/trading
+  VERSION: ${{ github.sha }}
+  NAME: go_cicd
+
 on:
   push:
     branches: [ main ]
@@ -12,23 +17,40 @@ jobs:
       - name: Actions Checkout
         uses: actions/checkout@v3
 
-      - name: Pwd
-        run: pwd
-
-      - name: List
-        run: ls
-
-      - name: git log
-        run: git log --oneline --all
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Docker Image build
-        run: docker build . -t test:1.0
-      
+      - name: Login to ghcr(github container registry)
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
   deploy:
-    runs-on: self-hosted
+    needs: build
+    name: Deploy
+    runs-on: [ self-hosted, label-go ]
     steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      - name: ls-Test
+        run: ls -al
+      - name: pwd-test
+        run: pwd
       - name: Docker run
-        run: docker run -d -p 3000:3000 test:1.0
+        run: |
+          cd actionTest
+          docker build --tag ${{ env.DOCKER_IMAGE }} .
+          docker run -d -p 4000:4000 --name go_cicd --restart always ${{ env.DOCKER_IMAGE }}:latest
