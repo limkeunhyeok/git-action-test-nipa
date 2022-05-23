@@ -15,8 +15,8 @@ jobs:
       - name: Pwd
         run: pwd
 
-      - name: ls
-	run: ls
+      - name: List
+        run: ls
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
