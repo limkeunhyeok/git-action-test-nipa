@@ -3,7 +3,6 @@ FROM node:16.13-alpine3.14
 WORKDIR /app
 
 COPY package.json ./
-COPY tsconfig.json ./
 
 RUN npm install
 
