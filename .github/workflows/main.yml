@@ -28,7 +28,7 @@ jobs:
         run: docker build . -t test:1.0
       
   deploy:
-    runs-on: [ self-hosted, label-go ]
+    runs-on: self-hosted
     steps:
       - name: Docker run
         run: docker run -d -p 3000:3000 test:1.0
